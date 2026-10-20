@@ -56,7 +56,19 @@ const MENU = [
 
 export default function HomeScreen() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [ecran, setEcran] = useState('Accueil');
+  const [message, setMessage] = useState(null);
+  const timerRef = useRef(null);
   const slide = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
+
+  // Snackbar : affiche un message pendant 2,5 secondes
+  const afficherMessage = (texte) => {
+    setMessage(texte);
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    timerRef.current = setTimeout(() => setMessage(null), 2500);
+  };
 
   const ouvrirDrawer = () => {
     setDrawerOpen(true);
@@ -75,8 +87,25 @@ export default function HomeScreen() {
     }).start(() => setDrawerOpen(false));
   };
 
+  const choisirEcran = (key) => {
+    setEcran(key);
+    fermerDrawer();
+  };
+
+  const onFabPress = () => {
+    afficherMessage('Nouvelle activité');
+  };
+
+  const onActivitePress = (item) => {
+    afficherMessage(item.titre);
+  };
+
   const renderActivite = ({ item }) => (
-    <TouchableOpacity style={styles.card} activeOpacity={0.7}>
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.7}
+      onPress={() => onActivitePress(item)}
+    >
       <View style={styles.cardIconBox}>
         <Text style={styles.cardIcon}>{item.icone}</Text>
       </View>
@@ -99,26 +128,47 @@ export default function HomeScreen() {
         <View style={styles.appBarBtn} />
       </View>
 
-      {/* Liste des activités */}
+      {/* Contenu selon l'entrée choisie dans le Drawer */}
       <View style={styles.content}>
-        <FlatList
-          data={ACTIVITES}
-          keyExtractor={(item) => String(item.id)}
-          renderItem={renderActivite}
-          contentContainerStyle={styles.listContent}
-          ListHeaderComponent={
-            <View style={styles.greeting}>
-              <Text style={styles.greetingSmall}>BONJOUR !</Text>
-              <Text style={styles.greetingBig}>
-                Quelle activité aujourd'hui ?
-              </Text>
-            </View>
-          }
-        />
+        {ecran === 'À propos' ? (
+          <View style={styles.about}>
+            <Text style={styles.aboutEmoji}>🧸</Text>
+            <Text style={styles.aboutTitle}>À propos</Text>
+            <Text style={styles.aboutText}>
+              Ma Garderie est une application mobile qui présente les activités
+              proposées aux enfants de la garderie.
+            </Text>
+            <Text style={styles.aboutVersion}>Version 1.0.0</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={ACTIVITES}
+            keyExtractor={(item) => String(item.id)}
+            renderItem={renderActivite}
+            contentContainerStyle={styles.listContent}
+            ListHeaderComponent={
+              ecran === 'Accueil' ? (
+                <View style={styles.greeting}>
+                  <Text style={styles.greetingSmall}>BONJOUR !</Text>
+                  <Text style={styles.greetingBig}>
+                    Quelle activité aujourd'hui ?
+                  </Text>
+                </View>
+              ) : null
+            }
+          />
+        )}
       </View>
 
+      {/* Snackbar */}
+      {message && (
+        <View style={styles.snackbar}>
+          <Text style={styles.snackbarText}>{message}</Text>
+        </View>
+      )}
+
       {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab} onPress={() => {}}>
+      <TouchableOpacity style={styles.fab} onPress={onFabPress}>
         <Text style={styles.fabIcon}>+</Text>
       </TouchableOpacity>
 
@@ -130,16 +180,23 @@ export default function HomeScreen() {
             style={[styles.drawer, { transform: [{ translateX: slide }] }]}
           >
             <Text style={styles.drawerTitle}>Ma Garderie</Text>
-            {MENU.map((item) => (
-              <TouchableOpacity
-                key={item.key}
-                style={styles.drawerItem}
-                onPress={fermerDrawer}
-              >
-                <Text style={styles.drawerIcon}>{item.icone}</Text>
-                <Text style={styles.drawerLabel}>{item.label}</Text>
-              </TouchableOpacity>
-            ))}
+            {MENU.map((item) => {
+              const actif = ecran === item.key;
+              return (
+                <TouchableOpacity
+                  key={item.key}
+                  style={[styles.drawerItem, actif && styles.drawerItemActive]}
+                  onPress={() => choisirEcran(item.key)}
+                >
+                  <Text style={styles.drawerIcon}>{item.icone}</Text>
+                  <Text
+                    style={[styles.drawerLabel, actif && styles.drawerLabelActive]}
+                  >
+                    {item.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </Animated.View>
         </View>
       )}
@@ -244,6 +301,48 @@ const styles = StyleSheet.create({
     color: '#A0AABF',
     marginLeft: 8,
   },
+  about: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 32,
+  },
+  aboutEmoji: {
+    fontSize: 64,
+    marginBottom: 12,
+  },
+  aboutTitle: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#1F2A44',
+    marginBottom: 12,
+  },
+  aboutText: {
+    fontSize: 16,
+    color: '#4A5875',
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  aboutVersion: {
+    fontSize: 14,
+    color: '#A0AABF',
+    marginTop: 20,
+  },
+  snackbar: {
+    position: 'absolute',
+    left: 16,
+    right: 100,
+    bottom: 36,
+    backgroundColor: '#323232',
+    borderRadius: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    elevation: 8,
+  },
+  snackbarText: {
+    color: '#fff',
+    fontSize: 16,
+  },
   fab: {
     position: 'absolute',
     right: 20,
@@ -291,6 +390,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 20,
   },
+  drawerItemActive: {
+    backgroundColor: '#E3EEFB',
+  },
   drawerIcon: {
     fontSize: 22,
     marginRight: 16,
@@ -298,5 +400,9 @@ const styles = StyleSheet.create({
   drawerLabel: {
     fontSize: 18,
     color: '#1F2A44',
+  },
+  drawerLabelActive: {
+    fontWeight: 'bold',
+    color: '#3B82E6',
   },
 });
