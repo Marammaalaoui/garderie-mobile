@@ -49,7 +49,7 @@ npx expo start
 
 ### Message affiché après une interaction
 
-![Interaction](screenshots/message affiché.png)
+![Interaction](screenshots/Message affiché.png)
 
 ## Organisation Git
 
