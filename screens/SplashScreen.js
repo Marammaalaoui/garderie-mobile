@@ -10,7 +10,7 @@ export default function SplashScreen({ onFinish }) {
   return (
     <View style={styles.container}>
       <Image
-        source={require('../assets/images/garderie.png')}
+        source={require('../assets/images/garderie.jpg')}
         style={styles.image}
         resizeMode="contain"
       />
