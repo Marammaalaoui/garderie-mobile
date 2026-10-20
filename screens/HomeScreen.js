@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import {
   Animated,
+  FlatList,
   Platform,
   Pressable,
   SafeAreaView,
@@ -13,6 +14,39 @@ import {
 
 const DRAWER_WIDTH = 270;
 const TOP_PADDING = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 0;
+
+const ACTIVITES = [
+  {
+    id: 1,
+    titre: 'Dessin et coloriage',
+    description: 'Développement de la créativité',
+    icone: '🎨',
+  },
+  {
+    id: 2,
+    titre: 'Jeux éducatifs',
+    description: 'Apprentissage par le jeu',
+    icone: '🧩',
+  },
+  {
+    id: 3,
+    titre: 'Musique et chansons',
+    description: 'Éveil musical des enfants',
+    icone: '🎵',
+  },
+  {
+    id: 4,
+    titre: 'Lecture de contes',
+    description: 'Découverte des histoires',
+    icone: '📚',
+  },
+  {
+    id: 5,
+    titre: 'Activités sportives',
+    description: 'Développement de la motricité',
+    icone: '⚽',
+  },
+];
 
 const MENU = [
   { key: 'Accueil', label: 'Accueil', icone: '🏠' },
@@ -41,6 +75,19 @@ export default function HomeScreen() {
     }).start(() => setDrawerOpen(false));
   };
 
+  const renderActivite = ({ item }) => (
+    <TouchableOpacity style={styles.card} activeOpacity={0.7}>
+      <View style={styles.cardIconBox}>
+        <Text style={styles.cardIcon}>{item.icone}</Text>
+      </View>
+      <View style={styles.cardTextBox}>
+        <Text style={styles.cardTitle}>{item.titre}</Text>
+        <Text style={styles.cardDescription}>{item.description}</Text>
+      </View>
+      <Text style={styles.chevron}>›</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <SafeAreaView style={styles.safe}>
       {/* AppBar */}
@@ -52,11 +99,22 @@ export default function HomeScreen() {
         <View style={styles.appBarBtn} />
       </View>
 
-      {/* Espace réservé à la liste d'activités */}
+      {/* Liste des activités */}
       <View style={styles.content}>
-        <Text style={styles.placeholder}>
-          La liste des activités s'affichera ici
-        </Text>
+        <FlatList
+          data={ACTIVITES}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={renderActivite}
+          contentContainerStyle={styles.listContent}
+          ListHeaderComponent={
+            <View style={styles.greeting}>
+              <Text style={styles.greetingSmall}>BONJOUR !</Text>
+              <Text style={styles.greetingBig}>
+                Quelle activité aujourd'hui ?
+              </Text>
+            </View>
+          }
+        />
       </View>
 
       {/* Floating Action Button */}
@@ -121,14 +179,70 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     backgroundColor: '#F4F8FD',
+  },
+  listContent: {
+    padding: 16,
+    paddingBottom: 100,
+  },
+  greeting: {
+    backgroundColor: '#E3EEFB',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+  },
+  greetingSmall: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#6B7A99',
+    marginBottom: 4,
+  },
+  greetingBig: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1F2A44',
+  },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  cardIconBox: {
+    width: 54,
+    height: 54,
+    borderRadius: 12,
+    backgroundColor: '#EEF4FF',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
+    marginRight: 14,
   },
-  placeholder: {
-    fontSize: 16,
+  cardIcon: {
+    fontSize: 28,
+  },
+  cardTextBox: {
+    flex: 1,
+  },
+  cardTitle: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#1F2A44',
+  },
+  cardDescription: {
+    fontSize: 14,
     color: '#6B7A99',
-    textAlign: 'center',
+    marginTop: 2,
+  },
+  chevron: {
+    fontSize: 28,
+    color: '#A0AABF',
+    marginLeft: 8,
   },
   fab: {
     position: 'absolute',
